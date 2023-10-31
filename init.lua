@@ -1,43 +1,17 @@
--- Package Collection: https://github.com/rockerBOO/awesome-neovim
-
--- Packages
+-----------------------------------------------------------------------------------------------------------------------------
+-- Documentation
 --
--- packages, semicolons are required
-require "paq" {
-    "https://github.com/savq/paq-nvim";
-
-    -- lsp server package manager and lsp additions (see mason github)
-    "https://github.com/williamboman/mason.nvim";
-    "https://github.com/williamboman/mason-lspconfig.nvim";
-    "https://github.com/neovim/nvim-lspconfig";
-
-    -- better highlighting with treesitter
-    "https://github.com/nvim-treesitter/nvim-treesitter";
-
-    -- colorscheme
-    "https://github.com/joshdick/onedark.vim";
-
-    -- nerdtree
-    "https://github.com/preservim/nerdtree";
-    "https://github.com/Xuyuanp/nerdtree-git-plugin";
-    "https://github.com/ryanoasis/vim-devicons";
-
-    -- #ffaabb color preview
-    "https://github.com/ap/vim-css-color";
-
-    -- airline at the bottom
-    "https://github.com/vim-airline/vim-airline";
-    "https://github.com/vim-airline/vim-airline-themes";
-
-    -- code completion
-    "https://github.com/hrsh7th/cmp-vsnip";
-    "https://github.com/hrsh7th/vim-vsnip";
-
-    "https://github.com/hrsh7th/cmp-nvim-lsp";
-    "https://github.com/hrsh7th/cmp-path";
-    "https://github.com/hrsh7th/cmp-cmdline";
-    "https://github.com/hrsh7th/nvim-cmp";
-}
+-- default data path: ~/.local/share/nvim/
+-- default config path: ~/.config/nvim/init.lua
+-- plugins are added to plugins array encoded as string "<githubusername>/<reponame>"
+-- check for plugin updates :Lazy check
+-- update plugins :Lazy update
+-- install language for treesitter :TSInstall <language_to_install> (or add to treesizzer languages setup below)
+-- installed treesitter parsers :TSInstallInfo
+-- for clang add include paths for lsp (clangd backend) 
+-- add .clangd file in path where neovim is executed with the format
+-- CompileFlags:
+--     Add: -I<absolute path to include directory>
 
 -- Options
 --
@@ -52,11 +26,6 @@ vim.opt.expandtab       = true
 vim.opt.tabstop         = 4
 vim.opt.shiftwidth      = 4
 
--- Global variables
---
--- global variables with vim.g.var = value
-vim.g.NERDTreeQuitOnOpen = 1
-
 -- Keymappings
 --
 -- vim.api.nvim_set_keymap(mode, binding, action, option-array)
@@ -66,109 +35,108 @@ vim.g.NERDTreeQuitOnOpen = 1
 vim.api.nvim_set_keymap("", "<C-n>", ":NERDTreeToggle<CR>", {})
 vim.api.nvim_set_keymap("i", "jj", "<Esc>", {})
 
+-- Plugins
+--
+-- Format: "<githubusername>/<reponame>"
+local plugins = {
+    "neovim/nvim-lspconfig", -- enable usage of language servers supporting lsp
+    "nvim-treesitter/nvim-treesitter", -- live-parsing of source (treesitter) + hightlighting
+    "https://github.com/ap/vim-css-color", -- color preview
+    "https://github.com/joshdick/onedark.vim", -- colorscheme
+    "https://github.com/preservim/nerdtree",  -- project sidebar
+    "https://github.com/Xuyuanp/nerdtree-git-plugin",
+    "https://github.com/ryanoasis/vim-devicons",
+
+    -- code completion
+    "neovim/nvim-lspconfig",
+    "hrsh7th/cmp-nvim-lsp", 
+    "hrsh7th/cmp-buffer",
+    "hrsh7th/cmp-path",
+    "hrsh7th/cmp-cmdline",
+    "hrsh7th/nvim-cmp",
+}
+
+-- Colorscheme
+--
+local colorscheme = "onedark"
+-----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- bootstrap package manager (lazy)
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable", -- latest stable release
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
+
+
+-- make sure plugins are installed via package manager
+require("lazy").setup(plugins)
+
+
+-- list of languages as languageservers for lsp and parsers for treesitter
+local lspcfg = require "lspconfig"
+local tslangs = {}
+
+
+-- diff
+tslangs[#tslangs+1] = "diff"
+-- cmake
+tslangs[#tslangs+1] = "cmake"
+-- kconfig
+tslangs[#tslangs+1] = "kconfig"
+-- lua
+tslangs[#tslangs+1] = "lua"
+-- perl
+tslangs[#tslangs+1] = "perl"
+-- bash
+tslangs[#tslangs+1] = "bash"
+-- rust
+tslangs[#tslangs+1] = "rust"
+lspcfg.rust_analyzer.setup{}
+-- regex
+tslangs[#tslangs+1] = "regex"
+-- toml
+tslangs[#tslangs+1] = "toml"
+-- yaml
+tslangs[#tslangs+1] = "yaml"
+-- markdown
+tslangs[#tslangs+1] = "markdown"
+-- python (pyright package required)
+lspcfg.pyright.setup{}
+tslangs[#tslangs+1] = "python"
+-- C/C++ (clangd package required)
+lspcfg.clangd.setup{}
+tslangs[#tslangs+1] = "c"
+tslangs[#tslangs+1] = "cpp"
+
+
+-- treesitter languages setup
+require("nvim-treesitter.configs").setup{
+    ensure_installed = tslangs,
+}
+
 -- Vimscript-Commands
 --
 -- backup if vimscript is required vim.cmd("string with command")
-vim.cmd("colorscheme onedark")
-
--- Treesitter
-local configs = require "nvim-treesitter.configs"
-configs.setup {
--- better syntax highlighting for those languages via treesitter 
--- https://medium.com/@shaikzahid0713/treesitter-7a52f64291c8
-    ensure_installed = {
-        "lua",
-        "python",
-        "rust",
-        "bash",
-        "regex",
-        "toml",
-        "yaml",
-        "markdown",
-        "c",
-        "cpp"
-    },
-    highlight = {
-        enable = true,
-        additional_vim_regex_highlighting = true,
-    },
-    indent = {
-        enable = true,
-    }
-}
-
--- LSP setup and code completion/recommendations
---
-
-require("mason").setup()
-require("mason-lspconfig").setup()
-
-
--- Set up lspconfig.
-local lsp = require('lspconfig')
-
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
-capabilities.autostart = true
-local lsp_setups = {capabilities = capabilities}
-
-lsp["clangd"].setup(lsp_setups)
-lsp["pyright"].setup(lsp_setups)
-lsp["rust_analyzer"].setup(lsp_setups)
-lsp["sumneko_lua"].setup(lsp_setups)
-lsp["bashls"].setup(lsp_setups)
-lsp["texlab"].setup(lsp_setups)
-
--- Set up nvim-cmp.
-local cmp = require'cmp'
-
-cmp.setup({
-  snippet = {
-    expand = function(args)
-      vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-    end,
-  },
-  window = {
-    completion = cmp.config.window.bordered(),
-    documentation = cmp.config.window.bordered(),
-  },
-  mapping = cmp.mapping.preset.insert({
-    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<C-e>'] = cmp.mapping.abort(),
-    ['<Tab>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-  }),
-  sources = cmp.config.sources({
-    { name = 'nvim_lsp' },
-    { name = 'vsnip' }, -- For vsnip users.
-  }, {
-    { name = 'buffer' },
-  })
-})
-
--- Set configuration for specific filetype.
-cmp.setup.filetype('gitcommit', {
-  sources = cmp.config.sources({
-    { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it.
-  }, {
-    { name = 'buffer' },
-  })
-})
-
--- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
-cmp.setup.cmdline({ '/', '?' }, {
-  mapping = cmp.mapping.preset.cmdline(),
-  sources = {
-    { name = 'buffer' }
-  }
-})
-
--- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
-cmp.setup.cmdline(':', {
-  mapping = cmp.mapping.preset.cmdline(),
-  sources = cmp.config.sources({
-    { name = 'path' }
-  }, {
-    { name = 'cmdline' }
-  })
-})
+vim.cmd("colorscheme "..colorscheme)
