@@ -25,6 +25,7 @@ vim.opt.title           = true
 vim.opt.expandtab       = true
 vim.opt.tabstop         = 4
 vim.opt.shiftwidth      = 4
+vim.opt.foldmethod      = "syntax"
 
 -- Keymappings
 --
@@ -129,6 +130,10 @@ tslangs[#tslangs+1] = "python"
 lspcfg.clangd.setup{}
 tslangs[#tslangs+1] = "c"
 tslangs[#tslangs+1] = "cpp"
+-- makefile
+tslangs[#tslangs+1] = "make"
+-- markdown
+tslangs[#tslangs+1] = "markdown"
 
 
 -- treesitter languages setup
